@@ -48,7 +48,7 @@ const onSearchSubmit = async e => {
       return;
     } else {
       greateCards(response.data.hits);
-      lightBox.refresh();
+      lightBox.refresh(); // Refresh lightBox after adding new cards
       loader.classList.add('hidden');
       loadMore.classList.remove('hidden'); // Show load more button
       totalPages = response.data.totalHits; // Update total pages
@@ -70,6 +70,8 @@ const onLoadMoreClick = async e => {
     loader.classList.remove('hidden');
     const response = await fetchPhotos(value, page);
     greateCards(response.data.hits);
+    lightBox.refresh(); // Refresh lightBox before scroll
+
     if (page * perPage >= totalPages) {
       iziToast.error({
         message: "We're sorry, but you've reached the end of search results.",
@@ -79,15 +81,19 @@ const onLoadMoreClick = async e => {
       loader.classList.add('hidden');
       return;
     }
-    const galleryCard = galleryList.querySelector('.gallery-item');
-    cardHeight = galleryCard.getBoundingClientRect().height;
-    scrollBy({
+
+    // Smooth scrolling
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const lastCard = galleryItems[galleryItems.length - response.data.hits.length];
+    const cardHeight = lastCard.getBoundingClientRect().height;
+
+    window.scrollBy({
       top: cardHeight * 2,
       behavior: 'smooth',
     });
+
     loader.classList.add('hidden');
     loadMore.classList.remove('hidden');
-    lightBox.refresh();
   } catch (err) {
     iziToast.error({
       message: `There is an Error ${err}. Try again!`,
